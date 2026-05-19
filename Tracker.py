@@ -43,4 +43,28 @@ class Tracker:
             'left': self.torrent.total_length,
             'compact': 1,
         }
-    
+
+    def parse_peers(self, peers: bytes):
+        self_adr = socket.gethostbyname(socket.gethostname())
+        LOG.info(f'Local IP address: {self_adr}'.format(self_adr))
+        def handle_bytes(peers_data):
+            peers = []
+            for i in range(0, len(peers_data), 6):
+                addr_bytes, port_bytes = (peers_data[i:i+4], peers_data[i+4:i+6])
+                ip_addr = str(ipaddress.IPv4Address(addr_bytes))
+                port = struct.unpack('!H', port_bytes)[0]
+
+                if ip_addr ==  self_adr:
+                    LOG.info(f'Skipping local IP address: {ip_addr}'.format(ip_addr))
+                    continue
+                peers.append((ip_addr, port))
+            return peers
+
+        def handle_dict(peers):
+            raise ValueError("Tracker response contains non-compact peer list, which is not supported.")   
+
+        handlers = {
+            bytes: handle_bytes,
+            dict: handle_dict,
+        }
+        return handlers[type(peers)](peers)
