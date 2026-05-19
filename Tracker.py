@@ -32,3 +32,15 @@ class Tracker:
             except AssertionError as e:
                 LOG.error(f'Error decoding tracker response: {e}'.format(e))
             return peers
+
+    def _get_request_params(self):
+        return {
+            'info_hash': self.torrent.info_hash,
+            'peer_id': PEER_ID,
+            'port': 6881,
+            'uploaded': 0,
+            'downloaded': 0,
+            'left': self.torrent.total_length,
+            'compact': 1,
+        }
+    
