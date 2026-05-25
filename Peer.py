@@ -6,7 +6,7 @@ import bitstring
 
 from utils import LOG, PEER_ID, REQUEST_SIZE
 
-class Peer:
+class Peer(object):
     def __init__(self, torrent_session, host, port):
         self.host = host
         self.port = port
@@ -22,4 +22,10 @@ class Peer:
         self.flight_request = 0
 
     def handshake(self):
-        pass
+        return struct.pack(
+            '>B19s8x20s20s',
+            19,
+            b'BitTorrent protocol',
+            self.torrent_session.torrent.info_hash,
+            PEER_ID.encode()
+        )
